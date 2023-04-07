@@ -12,6 +12,7 @@
 #include "ProjectileSim/MassProjectileHitInterface.h"
 #include "MassSignalSubsystem.h"
 #include "ProjectileSim/Fragments/MSProjectileFragments.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 
 UMSProjectileHitObservers::UMSProjectileHitObservers()
 {
