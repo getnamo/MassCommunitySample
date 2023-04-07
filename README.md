@@ -1,3 +1,7 @@
+# Fork note
+
+Refactored to only include the plugin as a submodule structure.
+
 # Community Mass Sample
 ### **Note:** This project requires `Git LFS` for it to work properly, `zip` downloads **won't work**.
 
