@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "MassEntitySubsystem.h"
 #include "NavigationSystem.h"
-#include "Common/Fragments/MSHashGridFragments.h"
+#include "Common/Fragments/MSOctreeFragments.h"
 #include "MSSubsystem.generated.h"
 
 /**
@@ -22,17 +22,28 @@ public:
 	
 	FMassArchetypeHandle MoverArchetype;
 
-	//FMSSpatialHash SpatialHashGrid;
-	FMSHashGrid3D HashGrid = FMSHashGrid3D(100.0f,FMassEntityHandle());
+	FMSOctree2 Octree2;
 	
 	UPROPERTY()
 	UNavigationSystemV1* NavSystem;
 
 	UFUNCTION(BlueprintCallable)
-	int32 SpawnEntity();
+	int32 SampleSpawnEntityExamples();
 
 	virtual void Deinitialize() override
 	{
 		EntityManager.Reset();
 	};
+};
+
+
+
+
+UCLASS(Config = Game, DefaultConfig)
+class MASSCOMMUNITYSAMPLE_API UMassSampleSettings : public UDeveloperSettings
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(config, EditAnywhere, Category = "Visible")
+	float OctreeBoundsSize = UE_LARGE_HALF_WORLD_MAX;
 };

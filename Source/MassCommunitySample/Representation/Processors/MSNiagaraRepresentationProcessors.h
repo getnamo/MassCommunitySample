@@ -16,18 +16,10 @@ class MASSCOMMUNITYSAMPLE_API UMSNiagaraRepresentationProcessors : public UMassP
 public:
 	
 	UMSNiagaraRepresentationProcessors();
-
-
-	void Initialize(UObject& Owner)
-	{
-		Super::Initialize(Owner);
-		//get subsystems here etc..
-	}
-
 	
 	virtual void ConfigureQueries() override;
 
-	virtual void Execute(FMassEntityManager& EntitySubsystem, FMassExecutionContext& Context) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 
 	
 	FMassEntityQuery PositionToNiagaraFragmentQuery;
@@ -44,7 +36,7 @@ public:
 	
 	virtual void ConfigureQueries() override;
 	
-	virtual void SignalEntities(FMassEntityManager& EntitySubsystem, FMassExecutionContext& Context,
+	virtual void SignalEntities(FMassEntityManager& EntityManager, FMassExecutionContext& Context,
 		FMassSignalNameLookup& EntitySignals) override;
 protected:
 	virtual void Initialize(UObject& Owner) override;

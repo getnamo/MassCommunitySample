@@ -22,13 +22,13 @@ struct FMassEntityWrapper
 	template<typename T>
 	FORCEINLINE bool HasTag() const
 	{
-		checkSlow(EntitySystem && Handle.IsValid());
+		checkSlow(Handle.IsValid());
 		return EntitySystem.GetArchetypeComposition(EntitySystem.GetArchetypeForEntity(Handle)).Tags.Contains<T>();
 	}
 	
 	FORCEINLINE bool HasTag(const UScriptStruct& TagType) const
 	{
-		checkSlow(EntitySystem && Handle.IsValid());
+		checkSlow(Handle.IsValid());
 		return EntitySystem.GetArchetypeComposition(EntitySystem.GetArchetypeForEntity(Handle)).Tags.Contains(TagType);
 	}
 
@@ -78,7 +78,7 @@ protected:
 	void BenchA(FMassEntityHandle Entity);
 	void BenchB(FMassEntityHandle Entity);
 
-	virtual void Execute(FMassEntityManager& EntitySubsystem, FMassExecutionContext& Context) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 
 	uint32 Counter;
 

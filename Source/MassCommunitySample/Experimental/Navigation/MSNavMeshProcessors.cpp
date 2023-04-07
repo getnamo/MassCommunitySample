@@ -17,36 +17,33 @@ UMSNavMeshProcessors::UMSNavMeshProcessors()
 {
 	ExecutionFlags = (int32)EProcessorExecutionFlags::All;
 	ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Movement;
-
-}
-
-void UMSNavMeshProcessors::Initialize(UObject& Owner)
-{
-	SignalSubsystem = GetWorld()->GetSubsystem<UMassSignalSubsystem>();
 }
 
 void UMSNavMeshProcessors::ConfigureQueries()
 {
 	EntityQuery.AddRequirement<FNavMeshAIFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadWrite);
-	EntityQuery.AddRequirement<FMassForceFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FMassVelocityFragment>(EMassFragmentAccess::ReadWrite);
 
 	EntityQuery.AddRequirement<FMassMoveTargetFragment>(EMassFragmentAccess::ReadWrite);
+	EntityQuery.AddSubsystemRequirement<UMassSignalSubsystem>(EMassFragmentAccess::ReadWrite);
+
 	EntityQuery.RegisterWithProcessor(*this);
 
+	// Do we need this and the qeury? I should probably look into this
+	ProcessorRequirements.AddSubsystemRequirement<UMassSignalSubsystem>(EMassFragmentAccess::ReadWrite);
+	
 }
 
-void UMSNavMeshProcessors::Execute(FMassEntityManager& EntitySubsystem, FMassExecutionContext& Context)
+void UMSNavMeshProcessors::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
 	TArray<FMassEntityHandle> EntitiesToSignalPathDone;
 
-	EntityQuery.ForEachEntityChunk(EntitySubsystem, Context, [&,this](FMassExecutionContext& Context)
+	EntityQuery.ForEachEntityChunk(EntityManager, Context, [&,this](FMassExecutionContext& Context)
 	{
 		const auto NavMeshAIFragmentList = Context.GetMutableFragmentView<FNavMeshAIFragment>();
 
 		const auto TransformList = Context.GetMutableFragmentView<FTransformFragment>();
-		const auto ForceList = Context.GetMutableFragmentView<FMassForceFragment>();
 		const auto VelocityList = Context.GetMutableFragmentView<FMassVelocityFragment>();
 
 		const auto MoveTargetList = Context.GetMutableFragmentView<FMassMoveTargetFragment>();
@@ -55,12 +52,9 @@ void UMSNavMeshProcessors::Execute(FMassEntityManager& EntitySubsystem, FMassExe
 		{
 			
 			auto& NavMeshAIFragment = NavMeshAIFragmentList[i];
-			auto& ForceFragment = ForceList[i];
 			auto& MoveTargetFragment = MoveTargetList[i];
 			auto& VelocityFragment = VelocityList[i];
-
 			
-
 			const FTransform& AgentTransform = TransformList[i].GetTransform();
 
 			FVector MoveDirection = (NavMeshAIFragment.NextPathNodePos - AgentTransform.GetLocation()).GetSafeNormal();
@@ -68,13 +62,7 @@ void UMSNavMeshProcessors::Execute(FMassEntityManager& EntitySubsystem, FMassExe
 			VelocityFragment.Value = MoveDirection * MoveTargetFragment.DesiredSpeed.Get();
 			
 			MoveTargetFragment.DistanceToGoal = (MoveTargetFragment.Center -  AgentTransform.GetLocation()).Length();
-
-			const FVector ArrowEnd = AgentTransform.GetLocation()+(MoveDirection*50.0f); 
-
 			
-			DrawDebugLine(GetWorld(),AgentTransform.GetLocation(),ArrowEnd,FColor::Red,false,0.0f,0,1.0f);
-
-
 			const float DistanceToNextGoal = (NavMeshAIFragment.NextPathNodePos -  AgentTransform.GetLocation()).Length();
 
 			if(DistanceToNextGoal < 10.0f)
@@ -85,8 +73,8 @@ void UMSNavMeshProcessors::Execute(FMassEntityManager& EntitySubsystem, FMassExe
 	});
 
 
-	if (EntitiesToSignalPathDone.Num())
+	if (EntitiesToSignalPathDone.Num() > 0)
 	{
-		SignalSubsystem->SignalEntities(UE::Mass::Signals::FollowPointPathDone, EntitiesToSignalPathDone);
+		Context.GetMutableSubsystem<UMassSignalSubsystem>(EntityManager.GetWorld())->SignalEntities(UE::Mass::Signals::NewStateTreeTaskRequired, EntitiesToSignalPathDone);
 	}
 }

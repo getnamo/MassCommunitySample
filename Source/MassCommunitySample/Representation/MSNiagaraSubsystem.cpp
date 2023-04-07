@@ -1,7 +1,9 @@
 ﻿#include "MSNiagaraSubsystem.h"
 
+#include "MassEntitySubsystem.h"
 #include "MSNiagaraActor.h"
 #include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 #include "Fragments/MSRepresentationFragments.h"
 
 
@@ -13,12 +15,19 @@ void UMSNiagaraSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	
 }
 
-FSharedStruct UMSNiagaraSubsystem::GetOrCreateSharedNiagaraFragmentForSystemType(UNiagaraSystem* NiagaraSystem)
+FSharedStruct UMSNiagaraSubsystem::GetOrCreateSharedNiagaraFragmentForSystemType(UNiagaraSystem* NiagaraSystem, UStaticMesh* StaticMeshOverride)
 {
 
-	//we only want to key these based off of unique types of niagara systems! Usually the entire fragment would be hashed.
-	uint32 ParamsHash = PointerHash(NiagaraSystem);
+	// We only want to key these based off of unique types of niagara systems! Usually the entire fragment would be hashed.
 
+	// Probably a more sensible way to get a consistent hash?
+	uint32 NiagaraAssetHash = GetTypeHash(NiagaraSystem->GetPathName());
+	uint32 ParamsHash = NiagaraAssetHash;
+	if(StaticMeshOverride)
+	{
+		uint32 StaticMeshOverrideAssetHash = GetTypeHash(StaticMeshOverride->GetPathName());
+		ParamsHash = HashCombineFast(NiagaraAssetHash,StaticMeshOverrideAssetHash);
+	}
 	FSharedNiagaraSystemFragment SharedStructToReturn;
 
 	//try to see if we have seen this system type before...
@@ -28,16 +37,26 @@ FSharedStruct UMSNiagaraSubsystem::GetOrCreateSharedNiagaraFragmentForSystemType
 		return MassManager->GetOrCreateSharedFragmentByHash<FSharedNiagaraSystemFragment>(ParamsHash,SharedStructToReturn);
 	}
 
-	//if not, we need to spawn an entity+actor for it!
-	AMSNiagaraActor* NewNiagaraActor = GetWorld()->SpawnActor<AMSNiagaraActor>();
+	FActorSpawnParameters SpawnParameters;
 
+	SpawnParameters.ObjectFlags = RF_Transient | RF_DuplicateTransient;
+
+	//if not, we need to spawn an entity+actor for it!
+	AMSNiagaraActor* NewNiagaraActor = GetWorld()->SpawnActor<AMSNiagaraActor>(SpawnParameters);
+
+	// We need this to tick last so that it receives the new gameplay state we create in the mass manager (stuff moving etc) for the next frame.
+	NewNiagaraActor->GetNiagaraComponent()->SetTickBehavior(ENiagaraTickBehavior::ForceTickLast);
 	NewNiagaraActor->GetNiagaraComponent()->SetAsset(NiagaraSystem);
-	
+
+	if(StaticMeshOverride)
+	{
+		NewNiagaraActor->GetNiagaraComponent()->SetVariableStaticMesh("StaticMeshToRender", StaticMeshOverride);
+		NewNiagaraActor->GetNiagaraComponent()->SetVariableMaterial("StaticMeshMaterial", StaticMeshOverride->GetMaterial(0));
+	}
 	SharedStructToReturn.NiagaraManagerActor = NewNiagaraActor;
 
-	PreexistingSharedNiagaraActors.Add(ParamsHash,NewNiagaraActor);
+	PreexistingSharedNiagaraActors.FindOrAdd(ParamsHash,NewNiagaraActor);
 	
 	return MassManager->GetOrCreateSharedFragmentByHash<FSharedNiagaraSystemFragment>(ParamsHash,SharedStructToReturn);
-	
 }
 

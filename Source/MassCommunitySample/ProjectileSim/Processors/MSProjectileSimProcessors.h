@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MassMovementFragments.h"
 #include "MassProcessor.h"
 #include "MSProjectileSimProcessors.generated.h"
 /**
@@ -18,13 +17,33 @@ class MASSCOMMUNITYSAMPLE_API UMSProjectileSimProcessors : public UMassProcessor
 	
 	virtual void ConfigureQueries() override;
 
-	virtual void Execute(FMassEntityManager& EntitySubsystem, FMassExecutionContext& Context) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 	
 	virtual void Initialize(UObject& Owner) override;
 	
+
 	FMassEntityQuery LineTraceFromPreviousPosition;
-	FMassEntityQuery MyQuery;
-	class UMassSignalSubsystem* SignalSubsystem;
+
+};
+
+
+UCLASS()
+class MASSCOMMUNITYSAMPLE_API UMSProjectileOctreeQueryProcessors : public UMassProcessor
+{
+	GENERATED_BODY()
+
+	UMSProjectileOctreeQueryProcessors();
+	
+	virtual void ConfigureQueries() override;
+
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
+	
+	virtual void Initialize(UObject& Owner) override;
+	
+	FMassEntityQuery ProjectileOctreeQuery;
+
+	UPROPERTY()
+	class UMSSubsystem* MSSubsystem;;
 };
 
 
