@@ -10,7 +10,7 @@
 
 
 // Updates the sample's TOctree2 node positions every frame
-// I would say this would better serve as a way of figuring out if we are near something rather than a straight up 
+// I would say this would better serve as a way of figuring out if we are near something rather than a straight up physics system
 UCLASS()
 class MASSCOMMUNITYSAMPLE_API UMSOctreeProcessor : public UMassProcessor
 {
@@ -30,6 +30,7 @@ public:
 	virtual void Initialize(UObject& Owner) override;
 	virtual void ConfigureQueries() override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
+	virtual void BeginDestroy() override;
 };
 
 UCLASS()
@@ -44,7 +45,7 @@ public:
 	FMassEntityQuery EntityQuery;
 
 	UPROPERTY()
-	UMSSubsystem* MassSampleSystem;
+	UMSSubsystem* MassSampleSystem = nullptr;
 	
 	virtual void Initialize(UObject& Owner) override;
 	virtual void ConfigureQueries() override;

@@ -62,7 +62,7 @@ struct MASSCOMMUNITYSAMPLE_API FMSOctreeFragment : public FMassFragment
 	TSharedPtr<FOctreeElementId2> OctreeID;
 };
 
-// To indicate the entity is in the hashgrid
+// To indicate the entity is in the octree, it should be added internally by an observer  
 USTRUCT(BlueprintType)
 struct MASSCOMMUNITYSAMPLE_API FMSInOctreeGridTag : public FMassTag
 {
@@ -76,19 +76,6 @@ struct MASSCOMMUNITYSAMPLE_API FMSSharedBaseBounds : public FMassSharedFragment
 	GENERATED_BODY()
 	// This must hash unique or this will hash collide? I need to figure that out..
 	UPROPERTY()
-	FBoxSphereBounds BoxSphereBounds;
+	FBoxSphereBounds BoxSphereBounds{ForceInit};
 };
 
-USTRUCT(BlueprintType)
-struct MASSCOMMUNITYSAMPLE_API FMSSharedStaticMesh : public FMassSharedFragment
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	TSoftObjectPtr<UStaticMesh> StaticMesh;
-	// These can't be obtained from the default body settings afaik? Oh well.
-	// todo-makenumbergoup store these suckers inline for realsies?
-	
-	TArray<Chaos::FImplicitObject*, TInlineAllocator<32>> GeoPointers;
-
-};

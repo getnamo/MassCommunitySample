@@ -1,7 +1,8 @@
 ﻿#pragma once
 #include "CoreMinimal.h"
 #include "MassEntityTypes.h"
-#include  "MSRepresentationFragments.generated.h"
+#include "Representation/MSNiagaraActor.h"
+#include "MSRepresentationFragments.generated.h"
 
 /**	Please keep in mind that we key NiagaraSystemFragments off of the pointer
 *	to the niagara system selected in the trait.
@@ -19,17 +20,34 @@ struct MASSCOMMUNITYSAMPLE_API FSharedNiagaraSystemFragment : public FMassShared
 	int32 IteratorOffset = 0;
 
 
-	UPROPERTY(EditAnywhere)
-	FName ParticlePositionsName = "MassParticlePositions";
+	inline static FName ParticlePositionsName = "MassParticlePositions";
+	
 	UPROPERTY()
 	TArray<FVector> ParticlePositions;
 	
-	UPROPERTY(EditAnywhere)
-	FName ParticleOrientationsParameterName = "MassParticleOrientations";
+	inline static FName ParticleOrientationsParameterName = "MassParticleOrientations";
 
 	UPROPERTY()
 	TArray<FQuat4f> ParticleOrientations;
+	
+	// todo: make this an instanced struct you can do whatever in?
+	// This is quite gross but not having this here risks archetype sorting fun afaik
+	
+	// custom parameter data:
+	inline static FName FirstCustomParticleDataName = "FirstCustomFloat";
+	UPROPERTY()
+	TArray<float> FirstCustomParticleData;
+	inline static FName SecondCustomParticleDataName = "SecondCustomFloat";
+	UPROPERTY()
+	TArray<float> SecondCustomParticleData;
 
+};
+USTRUCT()
+struct MASSCOMMUNITYSAMPLE_API FCustomNiagaraFloatsPairFragment : public FMassFragment
+{
+	GENERATED_BODY()
+	float FirstFloat = 0.0f;
+	float SecondFloat = 0.0f;
 };
 
 
@@ -67,3 +85,6 @@ struct MASSCOMMUNITYSAMPLE_API FSampleISMPerInstanceSingleFloatFragment : public
 	GENERATED_BODY()
 	float Data = 0.0f;
 };
+
+
+

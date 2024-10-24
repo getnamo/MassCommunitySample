@@ -4,6 +4,7 @@
 #include "MSPathologicalBenchmarkProcessor.h"
 
 #include "MassEntitySubsystem.h"
+#include "MassExecutionContext.h"
 
 //make this true to try the benchmark!
 constexpr bool benchmark = false;
@@ -49,6 +50,8 @@ UMSPathologicalBenchmarkProcessor::UMSPathologicalBenchmarkProcessor()
 
 void UMSPathologicalBenchmarkProcessor::Initialize(UObject& Owner)
  {
+	Super::Initialize(Owner);
+
 	 FMassEntityManager& EntityManager = GetWorld()->GetSubsystem<UMassEntitySubsystem>()->GetMutableEntityManager();
 
  	//10 Different fragments!

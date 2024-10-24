@@ -5,6 +5,7 @@
 #include "StateTreeLinker.h"
 #include "AITypes.h"
 #include "MassStateTreeExecutionContext.h"
+#include "NavMesh/NavMeshRenderingComponent.h"
 
 bool FMassNavMeshPathFollowTask::Link(FStateTreeLinker& Linker)
 {
@@ -81,15 +82,40 @@ EStateTreeRunStatus FMassNavMeshPathFollowTask::Tick(FStateTreeExecutionContext&
 				return EStateTreeRunStatus::Succeeded;
 			}
 
-#if WITH_EDITOR
-			// Result.Path.Get()->DebugDraw(Query.NavData.Get(), FColor::MakeRandomColor(),
-			   //                          Context.GetWorld()->GetCanvasForRenderingToTarget(), false, 10.0f);
-#endif
+			// rather expensive, uncomment this if you want to see where stuff is headed though
+
+		#if WITH_EDITOR
+					if (UNavMeshRenderingComponent::IsNavigationShowFlagSet(Context.GetWorld()))
+					{
+						Result.Path.Get()->DebugDraw(Query.NavData.Get(), FColor::MakeRandomSeededColor(MassContext.GetEntity().Index),
+									Context.GetWorld()->GetCanvasForRenderingToTarget(), false, 10.0f);
+					}
+		#endif
+			
 		}
 		else
 		{
 			return EStateTreeRunStatus::Failed;
 		}
 	}
+	return EStateTreeRunStatus::Running;
+}
+
+EStateTreeRunStatus FMassFindNavMeshPathWanderTargetInRadius::EnterState(FStateTreeExecutionContext& Context,
+	const FStateTreeTransitionResult& Transition) const
+{
+
+	auto NavSystem = Cast<UNavigationSystemV1>(Context.GetWorld()->GetNavigationSystem());
+	FNavLocation NavLocation;
+	const FVector Origin = Context.GetExternalData(TransformHandle).GetTransform().GetLocation();
+
+
+	// todo-navigation pass in nav property stuff
+	NavSystem->GetRandomReachablePointInRadius(Origin,Radius,NavLocation);
+
+	FMassFindNavMeshPathTargetInstanceData& InstanceData = Context.GetInstanceData<FMassFindNavMeshPathTargetInstanceData>(*this);
+
+	InstanceData.MoveTargetLocation = NavLocation.Location;
+
 	return EStateTreeRunStatus::Running;
 }
