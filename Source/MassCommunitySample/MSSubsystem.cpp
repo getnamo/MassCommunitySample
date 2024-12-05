@@ -15,7 +15,9 @@ void UMSSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	const UWorld* World = GetWorld();
 	
-	Collection.InitializeDependency<UMassEntitySubsystem>();
+	if (!ensure(Collection.InitializeDependency<UMassEntitySubsystem>())) {
+		return;
+	}
 	
 	EntityManager = World->GetSubsystem<UMassEntitySubsystem>()->GetMutableEntityManager().AsShared();
 
@@ -29,6 +31,12 @@ void UMSSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 int32 UMSSubsystem::SampleSpawnEntityExamples()
 {
+	/** NOTE: It should be noted that this is a very "raw" way to build entities,
+	* it serves to show how they can be manipulated with direct calls to the mass entity manager
+	*
+	* In most cases you will be changing entities by deferred commands and processors, rather than raw calls like this
+	*/ 
+	
 	//To spawn entities raw from C++ we can make a new archetype like so:
 	MoverArchetype =  EntityManager->CreateArchetype(
 	{
@@ -83,8 +91,12 @@ int32 UMSSubsystem::SampleSpawnEntityExamples()
 	EntityManager->Defer().PushCommand<FMassCommandBuildEntity>(ReserverdEntity,MyColorFragment);
 
 
-	// Flush the commands so this new entity is actually around
-	EntityManager->FlushCommands();
+	// Flush the commands so this new entity is actually around, but not during processing
+	if (!EntityManager->IsProcessing())
+	{
+		// This is an example because Mass will generally call FlushCommands commands for you during the frame, but sometimes immediate results are needed
+		EntityManager->FlushCommands();
+	}
 
 	
 	// Sets fragment data on an existing entity
