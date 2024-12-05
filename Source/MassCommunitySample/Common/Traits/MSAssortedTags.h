@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InstancedStruct.h"
+#include "StructUtils/InstancedStruct.h"
 #include "MassEntityTraitBase.h"
 #include "UObject/Object.h"
 #include "MSAssortedTags.generated.h"
