@@ -34,7 +34,6 @@ public class MassCommunitySample : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[] {
 				"MassEntity",
-				"StructUtils",
 				"MassCommon",
 				"MassMovement",
 				"MassActors",
