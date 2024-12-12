@@ -25,10 +25,6 @@
 
 	"Plugins": [
 		{
-			"Name": "MassEntity",
-			"Enabled": true
-		},
-		{
 			"Name": "MassGameplay",
 			"Enabled": true
 		},
