@@ -1,6 +1,6 @@
 # Fork note
 
-Refactored to only include the plugin as a submodule structure.
+Refactored to only include the plugin as a submodule structure. Detached from upstream for LFS usage reasons.
 
 # Community Mass Sample
 ### **Note:** This project requires `Git LFS` for it to work properly, `zip` downloads **won't work**.
